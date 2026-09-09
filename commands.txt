@@ -1,0 +1,159 @@
+================================================================================
+   REAL ESTATE WHATSAPP MARKETING & TEMPLATE SENDING SYSTEM
+   COMMANDS & STEP-BY-STEP EXECUTION GUIDE
+================================================================================
+
+--------------------------------------------------------------------------------
+STEP 1: INSTALLATION & ENVIRONMENT SETUP
+--------------------------------------------------------------------------------
+Description:
+  Installs required Python packages (requests, python-dotenv, fastapi, uvicorn)
+  and ensures your environment is ready.
+
+Command:
+  pip install -r requirements.txt
+
+Configuration:
+  Ensure your .env file in the project root contains your Meta credentials:
+    WHATSAPP_API_KEY=your_meta_access_token
+    PHONE_NUMBER_ID=your_phone_number_id
+    WHATSAPP_BUSSINESS_ACCOUNT_ID=your_waba_id
+    WEBHOOK_VERIFY_TOKEN=whatsapp_realestate_verify_token_123
+    PORT=8000
+
+
+--------------------------------------------------------------------------------
+STEP 2: VERIFY META WHATSAPP CLOUD API CREDENTIALS
+--------------------------------------------------------------------------------
+Description:
+  Tests connectivity to Meta's Graph API, validates your Access Token, and
+  retrieves your WhatsApp Phone Number ID, display name, and quality rating.
+
+Command:
+  python send_whatsapp.py --verify
+
+
+--------------------------------------------------------------------------------
+STEP 3: PREVIEW REAL ESTATE TEMPLATES & META JSON PAYLOADS
+--------------------------------------------------------------------------------
+Description:
+  Renders the real estate marketing template with dynamic variables (layout name,
+  location, plot sizes, price, amenities, CTA buttons) and outputs both the
+  human-readable message and the exact JSON payload sent to Meta Graph API.
+
+Commands:
+  # Preview default Project 1 template with Hero Image
+  python send_whatsapp.py --preview
+
+  # Preview with Walkthrough Video header
+  python send_whatsapp.py --preview --media VIDEO
+
+  # Preview with Layout Plan PDF header
+  python send_whatsapp.py --preview --media DOCUMENT
+
+  # Preview for a specific project ID (e.g., Project 2)
+  python send_whatsapp.py --preview --project-id 2
+
+
+--------------------------------------------------------------------------------
+STEP 4: VIEW LEADS & OPT-IN COMPLIANCE AUDIT
+--------------------------------------------------------------------------------
+Description:
+  Displays all registered leads from the database with their opt-in status,
+  consent timestamp, acquisition source, and eligibility badge. Non-opted-in
+  or STOP-unsubscribed leads are protected from promotional spam.
+
+Commands:
+  # View all leads and their compliance badges
+  python send_whatsapp.py --leads
+
+  # Manually record an opt-out (STOP) for a phone number
+  python send_whatsapp.py --opt-out 919876543210
+
+
+--------------------------------------------------------------------------------
+STEP 5: SENDING REAL ESTATE TEMPLATES & MESSAGES
+--------------------------------------------------------------------------------
+Description:
+  Sends marketing templates to leads. Automatically enforces opt-in verification:
+  only leads with explicit consent will receive promotional messages.
+
+Commands:
+  # A. Dry Run Simulation (Tests full logic without calling Meta API)
+  python send_whatsapp.py --to 918825781789 --dry-run
+
+  # B. Send Approved Real Estate Marketing Template (real_estate_launch_v1)
+  python send_whatsapp.py --to 918825781789
+
+  # C. Send as Direct Rich Layout Media Message (Hero Image + Specs + Booking Links)
+  python send_whatsapp.py --to 918825781789 --direct
+
+  # D. Send an Approved Meta Template (e.g. hello_world for test accounts)
+  python send_whatsapp.py --to 918825781789 --template hello_world
+
+  # E. Launch a Multi-Lead Marketing Campaign (Dry Run)
+  python send_whatsapp.py --campaign --dry-run
+
+  # F. Launch Live Throttled Campaign for a Specific City
+  python send_whatsapp.py --campaign --project-id 1 --city Chennai
+
+  # G. Launch Campaign for All Opted-In Leads Across All Cities
+  python send_whatsapp.py --campaign --project-id 1 --city All
+
+  # H. Interactive Guided CLI Mode (Menu-driven)
+  python send_whatsapp.py --interactive
+
+
+--------------------------------------------------------------------------------
+STEP 6: START WEBHOOK SERVER & ADMIN DASHBOARD
+--------------------------------------------------------------------------------
+Description:
+  Launches the FastAPI application serving the Real Estate Marketing Dashboard,
+  Live Smartphone WhatsApp Simulator, Lead Management UI, and Webhook Receiver.
+
+Command:
+  python webhook_server.py
+
+Browser Access:
+  Open in your web browser:
+    http://127.0.0.1:8000/
+  Or on mobile phone connected to same Wi-Fi:
+    http://<YOUR_LOCAL_IP>:8000/
+
+
+--------------------------------------------------------------------------------
+STEP 7: EXPOSE WEBHOOK TO INTERNET (FOR META DEVELOPER DASHBOARD)
+--------------------------------------------------------------------------------
+Description:
+  Generates a public HTTPS URL so Meta's servers can deliver delivery receipts
+  (sent, delivered, read), opt-out replies (STOP), and inbound buyer messages.
+
+Commands (choose any ONE of the following in a second terminal):
+  # Option A: Cloudflare Tunnel (RECOMMENDED - Instant, high-speed, zero-lag, no signup)
+  & "C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://localhost:8000
+
+  # Option B: localtunnel
+  npx localtunnel --port 8000
+
+  # Option C: ngrok
+  ngrok http 8000
+
+Meta Webhook Configuration:
+  1. Go to: Meta Developer Portal -> WhatsApp -> Configuration -> Webhook -> Edit
+  2. Callback URL: https://<your-tunnel-url>/webhook
+  3. Verify Token: whatsapp_realestate_verify_token_123
+  4. Click "Verify and Save"
+  5. Under Webhook fields, click "Manage" and subscribe to "messages"
+
+
+--------------------------------------------------------------------------------
+STEP 8: RUN AUTOMATED TEST SUITE
+--------------------------------------------------------------------------------
+Description:
+  Executes all 16 unit and integration tests covering WhatsApp client formatting,
+  template generation, opt-in compliance, campaign audience filtering, STOP keyword
+  unsubscribes, and webhook endpoints.
+
+Command:
+  python test_suite.py
+================================================================================
