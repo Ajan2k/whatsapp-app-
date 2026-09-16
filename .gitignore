@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables & secrets
+.env
+
+# SQLite runtime databases
+*.db
+*.sqlite3
+
+# Temporary review artifacts
+page_*.png

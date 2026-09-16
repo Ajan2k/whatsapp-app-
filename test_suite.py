@@ -26,7 +26,7 @@ class TestWhatsAppClient(unittest.TestCase):
         self.assertEqual(WhatsAppClient.clean_phone_number(" 91 888 999 0000 "), "918889990000")
 
     def test_client_init(self):
-        client = WhatsAppClient()
+        client = WhatsAppClient(access_token="test_mock_token_12345", phone_number_id="100200300400")
         self.assertIsNotNone(client.access_token)
         self.assertIsNotNone(client.phone_number_id)
         self.assertTrue(client.messages_url.endswith("/messages"))
