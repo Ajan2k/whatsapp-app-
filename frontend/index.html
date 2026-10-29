@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Estate WhatsApp Marketing Platform • Meta Cloud API Engine</title>
+  <meta name="description" content="Enterprise Real Estate WhatsApp Marketing System integrated with Meta WhatsApp Business Cloud API. Opt-in compliance, template generation, throttled campaign engine, and real-time live sync.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- ==================== HEADER BAR ==================== -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-icon">🏡</div>
+        <div class="brand-titles">
+          <h1>
+            Real Estate WhatsApp Marketing
+            <span class="badge-version">v2.0 • Meta Cloud API</span>
+          </h1>
+          <p>Compliant Opt-In Funnel • Layout Launches • Interactive WhatsApp Simulator</p>
+        </div>
+      </div>
+
+      <div class="header-status-bar">
+        <!-- Live SSE Sync Status -->
+        <div class="status-pill" id="sseStatusPill" title="Server-Sent Events Connection State">
+          <span class="status-indicator pulse" id="sseStatusDot"></span>
+          <span id="sseStatusText">Connecting Sync...</span>
+        </div>
+
+        <!-- Meta API Health Status -->
+        <div class="status-pill" id="metaStatusPill" onclick="openModal('verifyCredsModal')" title="Click to verify Meta Cloud API credentials">
+          <span class="status-indicator" id="metaStatusDot"></span>
+          <span id="metaStatusText">Meta API: Checking...</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" id="btnHeaderVerify" onclick="openModal('verifyCredsModal')">
+          ⚡ Verify API
+        </button>
+        <button class="btn btn-secondary btn-sm" id="btnHeaderSendTest" onclick="openSendTestModal()">
+          💬 Send Test
+        </button>
+        <button class="btn btn-primary btn-sm" id="btnHeaderAddLead" onclick="openModal('addLeadModal')">
+          ➕ Add Lead
+        </button>
+      </div>
+    </header>
+
+    <!-- ==================== FUNNEL ANALYTICS BAR ==================== -->
+    <section class="analytics-grid" aria-label="Campaign Funnel Analytics">
+      <!-- Total Leads -->
+      <div class="kpi-card leads">
+        <div class="kpi-title">Total Leads</div>
+        <div class="kpi-val" id="kpiTotalLeads">0</div>
+        <div class="kpi-sub">Registered in CRM</div>
+      </div>
+
+      <!-- Eligible Opted-In -->
+      <div class="kpi-card eligible">
+        <div class="kpi-title">
+          <span>Eligible</span>
+          <span class="rate-pill" id="kpiOptRate">0% consent</span>
+        </div>
+        <div class="kpi-val" id="kpiEligibleLeads">0</div>
+        <div class="kpi-sub">Opted-In for WhatsApp</div>
+      </div>
+
+      <!-- Sent -->
+      <div class="kpi-card sent">
+        <div class="kpi-title">Dispatched</div>
+        <div class="kpi-val" id="kpiSent">0</div>
+        <div class="kpi-sub">Meta Cloud API Sent</div>
+      </div>
+
+      <!-- Delivered -->
+      <div class="kpi-card delivered">
+        <div class="kpi-title">
+          <span>Delivered</span>
+          <span class="rate-pill" id="kpiDeliveryRate">0%</span>
+        </div>
+        <div class="kpi-val" id="kpiDelivered">0</div>
+        <div class="kpi-sub">Webhook Verified</div>
+      </div>
+
+      <!-- Read -->
+      <div class="kpi-card read">
+        <div class="kpi-title">
+          <span>Read</span>
+          <span class="rate-pill" id="kpiReadRate">0%</span>
+        </div>
+        <div class="kpi-val" id="kpiReadRead" id="kpiRead">0</div>
+        <div class="kpi-sub">Blue Checkmark</div>
+      </div>
+
+      <!-- Inbound Replied -->
+      <div class="kpi-card replied">
+        <div class="kpi-title">Replied</div>
+        <div class="kpi-val" id="kpiReplied">0</div>
+        <div class="kpi-sub">Buyer Interactions</div>
+      </div>
+
+      <!-- Interested -->
+      <div class="kpi-card interested">
+        <div class="kpi-title">Interested</div>
+        <div class="kpi-val" id="kpiInterested">0</div>
+        <div class="kpi-sub">Lead Qualified</div>
+      </div>
+
+      <!-- Booked Plots -->
+      <div class="kpi-card booked">
+        <div class="kpi-title">Booked Plots</div>
+        <div class="kpi-val" id="kpiBooked">0</div>
+        <div class="kpi-sub">Funnel Conversion</div>
+      </div>
+    </section>
+
+    <!-- ==================== MAIN NAVIGATION TABS ==================== -->
+    <nav class="tabs-nav" aria-label="Dashboard Tabs">
+      <button class="tab-btn active" data-tab="tab-studio" id="tabNavStudio">
+        📱 Smartphone Simulator & Studio
+      </button>
+      <button class="tab-btn" data-tab="tab-campaigns" id="tabNavCampaigns">
+        🚀 Campaign Launchpad
+      </button>
+      <button class="tab-btn" data-tab="tab-leads" id="tabNavLeads">
+        👥 Lead Consent Manager
+      </button>
+      <button class="tab-btn" data-tab="tab-logs" id="tabNavLogs">
+        📊 Message & Webhook Logs
+      </button>
+      <button class="tab-btn" data-tab="tab-console" id="tabNavConsole">
+        💻 CLI Script Companion
+      </button>
+    </nav>
+
+    <!-- ==================== TAB 1: SMARTPHONE SIMULATOR & STUDIO ==================== -->
+    <section class="tab-content active" id="tab-studio">
+      <div class="studio-grid">
+        <!-- Phone Simulator Column -->
+        <div class="smartphone-container">
+          <div class="smartphone-frame">
+            <div class="phone-speaker"></div>
+            <div class="phone-camera"></div>
+
+            <!-- Phone Top Status Bar -->
+            <div class="phone-status-bar">
+              <span id="phoneTime">09:41</span>
+              <span>●●● 5G 🔋</span>
+            </div>
+
+            <!-- WhatsApp Header -->
+            <div class="wa-header">
+              <div class="wa-avatar">🏡</div>
+              <div class="wa-header-info">
+                <div class="wa-header-name">
+                  <span id="simProjectName">ABC Properties</span>
+                  <span class="wa-verified-badge" title="Meta Verified Business">✔</span>
+                </div>
+                <div class="wa-header-status">Official Business Account</div>
+              </div>
+              <div style="color: var(--text-muted); font-size: 16px;">⋮</div>
+            </div>
+
+            <!-- WhatsApp Chat Message Flow -->
+            <div class="wa-chat-area">
+              <div class="chat-date-pill">TODAY</div>
+
+              <div class="wa-bubble-container">
+                <div class="wa-card">
+                  <!-- Dynamic Media Header Container -->
+                  <div id="simMediaContainer">
+                    <!-- Injected by JavaScript based on Image / Video / PDF -->
+                  </div>
+
+                  <!-- Template Body with highlighted specs -->
+                  <div class="wa-card-body" id="simBodyText">
+                    Loading template preview...
+                  </div>
+
+                  <!-- Footer & Double Blue Ticks -->
+                  <div class="wa-card-footer">
+                    <span id="simFooterText">Reply STOP to unsubscribe • ABC Properties</span>
+                    <span class="wa-timestamp">
+                      <span id="simTimestamp">09:41</span>
+                      <span class="wa-double-check">✓✓</span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Interactive CTA Buttons -->
+                <div class="wa-buttons-stack" id="simButtonsStack">
+                  <!-- Injected by JavaScript -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Studio Inspector Column -->
+        <div class="studio-card">
+          <div class="studio-card-header">
+            <h2>⚙️ Marketing Template Studio</h2>
+            <span class="badge-version">real_estate_launch_v1</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="projectSelector">Select Real Estate Project / Layout</label>
+              <select id="projectSelector" class="form-control">
+                <!-- Injected by JavaScript -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="leadNameInput">Recipient Name (Variable {{1}})</label>
+              <input type="text" id="leadNameInput" class="form-control" value="Aravind Kumar" placeholder="Enter recipient name">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Header Media Asset Type</label>
+            <div class="media-toggle-group">
+              <button type="button" class="media-toggle-btn active" data-media="IMAGE">
+                🖼️ Hero Image (1200x800)
+              </button>
+              <button type="button" class="media-toggle-btn" data-media="VIDEO">
+                🎬 Walkthrough Video (MP4)
+              </button>
+              <button type="button" class="media-toggle-btn" data-media="DOCUMENT">
+                📑 Layout Plan PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Meta Graph API Payload -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label>Meta WhatsApp Cloud API Payload (POST /v21.0/{phone-id}/messages)</label>
+              <button type="button" class="btn btn-secondary btn-sm" id="copyPayloadBtn">📋 Copy JSON</button>
+            </div>
+            <pre class="code-block" id="metaJsonPayload">Loading payload...</pre>
+          </div>
+
+          <!-- CLI Equivalent Command -->
+          <div class="form-group">
+            <label>Matching CLI Command Equivalent</label>
+            <pre class="code-block" id="cliEquivalentCode" style="color: var(--accent-mint); max-height: 80px; padding: 10px;">python send_whatsapp.py --preview</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: CAMPAIGN LAUNCHPAD ==================== -->
+    <section class="tab-content" id="tab-campaigns">
+      <div class="studio-card">
+        <div class="studio-card-header">
+          <h2>🚀 WhatsApp Marketing Campaign Launchpad</h2>
+          <span style="font-size: 12px; color: var(--text-muted);">Strict Opt-in Compliance & Throttling</span>
+        </div>
+
+        <form id="campaignForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="campaignName">Campaign Title</label>
+              <input type="text" id="campaignName" class="form-control" value="Grand Weekend Launch - Phase 1" required>
+            </div>
+
+            <div class="form-group">
+              <label for="campaignProject">Target Project</label>
+              <select id="campaignProject" class="form-control">
+                <!-- Injected by JavaScript -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top: 14px;">
+            <div class="form-group">
+              <label for="campaignCity">Audience City Segmentation</label>
+              <select id="campaignCity" class="form-control">
+                <option value="All">All Cities (Entire Registered Pool)</option>
+                <option value="Chennai">Chennai Region Only</option>
+                <option value="Bangalore">Bangalore Region Only</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="campaignMediaType">Media Header</label>
+              <select id="campaignMediaType" class="form-control">
+                <option value="IMAGE">Hero Layout Image</option>
+                <option value="VIDEO">4K Video Walkthrough</option>
+                <option value="DOCUMENT">Layout PDF Brochure</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Live Audience Segmentation Card -->
+          <div style="background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: var(--radius-md); padding: 18px; margin-top: 20px;">
+            <div style="font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+              <span>🎯 Audience Segmentation Breakdown</span>
+              <span class="badge-version">Pre-Flight Audit</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; text-align: center;">
+              <div style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Total Audience Pool</div>
+                <div style="font-size: 24px; font-weight: 800; color: #fff;" id="campTotalPool">0</div>
+              </div>
+              <div style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(37, 211, 102, 0.25);">
+                <div style="font-size: 11px; color: var(--accent-mint); text-transform: uppercase;">✔ Eligible (Opted-In)</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--accent-mint);" id="campEligibleCount">0</div>
+              </div>
+              <div style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(239, 68, 68, 0.25);">
+                <div style="font-size: 11px; color: var(--accent-rose); text-transform: uppercase;">🚫 Ineligible (Blocked)</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--accent-rose);" id="campIneligibleCount">0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top: 20px; align-items: center;">
+            <div class="form-group">
+              <label for="campaignThrottle">Dispatch Rate Throttling (Seconds between sends)</label>
+              <input type="number" id="campaignThrottle" class="form-control" value="0.2" step="0.1" min="0.1" max="2.0">
+              <span style="font-size: 11px; color: var(--text-dim);">Protects Meta WhatsApp Business API Tier limit.</span>
+            </div>
+
+            <div class="form-group" style="display: flex; flex-direction: row; align-items: center; gap: 12px; padding-top: 14px;">
+              <input type="checkbox" id="campaignDryRun" style="width: 18px; height: 18px; accent-color: var(--accent-emerald);">
+              <label for="campaignDryRun" style="margin: 0; cursor: pointer;">
+                <b>Dry-Run Simulation</b>
+                <div style="font-size: 11px; color: var(--text-muted);">Simulate message delivery without contacting Meta API</div>
+              </label>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary" id="launchCampaignBtn" style="padding: 12px 28px; font-size: 14px;">
+              🚀 Launch WhatsApp Campaign
+            </button>
+          </div>
+        </form>
+
+        <!-- Recent Campaigns -->
+        <div style="margin-top: 30px; border-top: 1px solid var(--border-subtle); padding-top: 20px;">
+          <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-highlight);">
+            Recent Marketing Campaigns
+          </h3>
+          <div id="campaignsList">
+            <!-- Injected by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: LEAD CONSENT MANAGER ==================== -->
+    <section class="tab-content" id="tab-leads">
+      <div class="table-wrapper">
+        <div class="table-toolbar">
+          <div class="table-search">
+            <span class="table-search-icon">🔍</span>
+            <input type="text" id="leadSearchInput" placeholder="Search by name, phone (+91...), or city...">
+          </div>
+
+          <div class="table-filters">
+            <button type="button" class="filter-btn active" data-filter="ALL">All Leads</button>
+            <button type="button" class="filter-btn" data-filter="OPTED_IN">✔ Opted-In (Eligible)</button>
+            <button type="button" class="filter-btn" data-filter="OPTED_OUT">✖ Opted-Out (STOP)</button>
+          </div>
+
+          <button type="button" class="btn btn-primary btn-sm" onclick="openModal('addLeadModal')">
+            ➕ Register New Lead
+          </button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Lead Name & Source</th>
+              <th>WhatsApp Phone</th>
+              <th>City / Interest</th>
+              <th>Consent Status</th>
+              <th>Quick Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody">
+            <!-- Injected by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: MESSAGE & WEBHOOK LOGS ==================== -->
+    <section class="tab-content" id="tab-logs">
+      <div class="table-wrapper">
+        <div class="table-toolbar">
+          <div style="font-weight: 700; color: #fff;">
+            Live WhatsApp Message & Delivery Audit Stream
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="fetchLogs()">
+            🔄 Refresh Logs
+          </button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Phone Number</th>
+              <th>Status</th>
+              <th>Template / Media</th>
+              <th>WhatsApp Message ID</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="logsTableBody">
+            <!-- Injected by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: CLI SCRIPT COMPANION ==================== -->
+    <section class="tab-content" id="tab-console">
+      <div class="studio-card">
+        <div class="studio-card-header">
+          <h2>💻 CLI Script Runner & Terminal Companion</h2>
+          <span style="font-size: 12px; color: var(--accent-mint); font-family: var(--font-mono);">send_whatsapp.py</span>
+        </div>
+
+        <p style="color: var(--text-muted); font-size: 13px;">
+          Execute CLI commands directly from this web dashboard. All actions are fully synced in real time across the database and live SSE stream.
+        </p>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+          <button class="btn btn-secondary btn-sm" onclick="runCliCommand('--verify')">
+            ⚡ Run Credentials Check (--verify)
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="runCliCommand('--leads')">
+            👥 Audit All Leads (--leads)
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="runCliCommand('--preview')">
+            📱 Preview Template (--preview)
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="runCliCommand('--campaign --dry-run')">
+            🚀 Simulated Campaign (--campaign --dry-run)
+          </button>
+        </div>
+
+        <!-- Live Terminal Window -->
+        <div class="console-container" style="margin-top: 16px;">
+          <div class="console-header">
+            <div class="terminal-dots">
+              <div class="terminal-dot dot-red"></div>
+              <div class="terminal-dot dot-yellow"></div>
+              <div class="terminal-dot dot-green"></div>
+            </div>
+            <div class="console-title">PowerShell • python send_whatsapp.py</div>
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10px;" onclick="document.getElementById('consoleOutput').textContent = '$ Terminal Ready.\n';">
+              Clear
+            </button>
+          </div>
+          <div class="console-body" id="consoleOutput">$ Terminal Ready. Run any command above or invoke from external terminal.
+All actions will automatically sync live with this dashboard.
+</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ==================== MODAL: ADD LEAD ==================== -->
+  <div class="modal-backdrop" id="addLeadModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>➕ Register Lead with Meta Opt-In Consent</h3>
+        <button class="modal-close-btn" onclick="closeModal('addLeadModal')">&times;</button>
+      </div>
+      <form id="addLeadForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="newLeadName">Full Name *</label>
+            <input type="text" id="newLeadName" class="form-control" placeholder="e.g. Anand Kumar" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newLeadPhone">WhatsApp Phone Number (with Country Code) *</label>
+            <input type="text" id="newLeadPhone" class="form-control" placeholder="e.g. 919876543210" required>
+            <span style="font-size: 11px; color: var(--text-dim);">Enter digits without '+', e.g. 918825781789</span>
+          </div>
+
+          <div class="form-group">
+            <label for="newLeadEmail">Email Address</label>
+            <input type="email" id="newLeadEmail" class="form-control" placeholder="anand@example.com">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="newLeadCity">City</label>
+              <select id="newLeadCity" class="form-control">
+                <option value="Chennai">Chennai</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Coimbatore">Coimbatore</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="newLeadProject">Project of Interest</label>
+              <select id="newLeadProject" class="form-control">
+                <option value="Green Valley Emerald">Green Valley Emerald Layout</option>
+                <option value="Sunrise Palm Meadows">Sunrise Palm Meadows</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="newLeadSource">Acquisition Source</label>
+            <input type="text" id="newLeadSource" class="form-control" value="Website Lead Form">
+          </div>
+
+          <!-- Mandatory Meta Opt-In Compliance Checkbox -->
+          <div style="background: rgba(0, 168, 132, 0.08); border: 1px solid rgba(0, 168, 132, 0.3); border-radius: var(--radius-sm); padding: 12px; display: flex; gap: 10px; align-items: flex-start; margin-top: 6px;">
+            <input type="checkbox" id="newLeadOptIn" checked style="width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent-emerald);">
+            <label for="newLeadOptIn" style="font-size: 12px; color: var(--text-main); line-height: 1.4; margin: 0; cursor: pointer;">
+              <b>Meta WhatsApp Business Policy Opt-In Verification</b>
+              <br>
+              Lead has explicitly opted-in to receive promotional real estate layouts, pricing, and launch notifications via WhatsApp.
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addLeadModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save & Register Lead</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: SEND SINGLE MESSAGE ==================== -->
+  <div class="modal-backdrop" id="sendTestModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>💬 Send WhatsApp Marketing Template</h3>
+        <button class="modal-close-btn" onclick="closeModal('sendTestModal')">&times;</button>
+      </div>
+      <form id="sendTestForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="testPhone">Recipient WhatsApp Number *</label>
+            <input type="text" id="testPhone" class="form-control" placeholder="918825781789" required>
+          </div>
+
+          <div class="form-group">
+            <label for="testLeadName">Lead Name</label>
+            <input type="text" id="testLeadName" class="form-control" placeholder="Aravind Kumar">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="testProject">Project Layout</label>
+              <select id="testProject" class="form-control">
+                <option value="1">Green Valley Emerald Layout</option>
+                <option value="2">Sunrise Palm Meadows</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="testMediaType">Media Asset</label>
+              <select id="testMediaType" class="form-control">
+                <option value="IMAGE">Hero Image</option>
+                <option value="VIDEO">Walkthrough Video</option>
+                <option value="DOCUMENT">PDF Brochure</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="testSendMode">Dispatch Mode</label>
+            <select id="testSendMode" class="form-control">
+              <option value="TEMPLATE">Standard Meta Template (real_estate_launch_v1)</option>
+              <option value="DIRECT">Direct Rich Layout Media (Hero Image + Specs + Booking Links)</option>
+              <option value="HELLO_WORLD">Meta Built-In Test Template (hello_world)</option>
+            </select>
+            <span style="font-size: 11px; color: var(--text-dim);">
+              Direct mode sends full layout cards even before custom templates are reviewed by Meta.
+            </span>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: row; align-items: center; gap: 10px; margin-top: 4px;">
+            <input type="checkbox" id="testDryRun" style="width: 18px; height: 18px; accent-color: var(--accent-emerald);">
+            <label for="testDryRun" style="margin: 0; cursor: pointer;">
+              <b>Dry-Run Simulation</b> (Test rendering without calling Meta API)
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('sendTestModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Dispatch WhatsApp Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: VERIFY CREDENTIALS ==================== -->
+  <div class="modal-backdrop" id="verifyCredsModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>⚡ Meta WhatsApp Cloud API Health & Credentials</h3>
+        <button class="modal-close-btn" onclick="closeModal('verifyCredsModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 13px;">
+          Verifies connectivity with Meta Graph API, tests your Access Token (<code>WHATSAPP_API_KEY</code>), and checks Phone Number ID status.
+        </p>
+
+        <div style="background: var(--bg-base); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 16px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6;" id="verifyModalOutput">
+          Click "Run Health Check" to test connectivity...
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('verifyCredsModal')">Close</button>
+        <button type="button" class="btn btn-primary" onclick="runMetaCredentialVerification()">Run Health Check</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
